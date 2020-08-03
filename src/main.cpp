@@ -2,7 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
-//#include <DNsserver.h>
+#include <DNsserver.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <Time.h>
@@ -13,13 +13,13 @@
 // Define NTP properties
 #define NTP_OFFSET   60 * 60      // In seconds
 #define NTP_INTERVAL 60 * 1000    // In miliseconds
-#define NTP_ADDREss  "id.pool.ntp.org"  // change this to whatever pool is closest (see ntp.org)
+#define NTP_ADDREss  "pool.ntp.org"  // change this to whatever pool is closest (see ntp.org)
 
 // Define Servo Properties
 #define ServoPin  D4
-#define ServoOff  120
+#define ServoOff  180
 #define ServoInit 90
-#define ServoOn 60
+#define ServoOn 0
 
 // Define other Output
 #define Ledblue D7
@@ -30,7 +30,7 @@
 
 // Set up the NTP UDP client
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, NTP_ADDREss);//, NTP_OFFSET, NTP_INTERVAL);
+NTPClient timeClient(ntpUDP, NTP_ADDREss, NTP_OFFSET, NTP_INTERVAL);
 
 // Set up the servo
 Servo shutterServo;
@@ -47,10 +47,14 @@ bool HasConn = false;
 bool FiredOn = false;
 bool FiredOff = false;
 
-int OnHour = 15;
+int OnHour = 17;
 int OnMinutes = 30;
 int OffHour = 5;
 int OffMinutes = 30;
+
+//Define Test Servo
+int TestSer = 0;
+int TestSeq = 10;
 
 
 void initServo() {
@@ -78,10 +82,11 @@ void initServo() {
   delay(2000);
 
   Serial.println("Done");
-  shutterServo.detach();
+  //shutterServo.detach();
 }
 
 void FiringServo(bool IsOn){
+  
   if(IsOn && !FiredOn){
     shutterServo.attach(ServoPin); 
     shutterServo.write(ServoOn);
@@ -94,10 +99,11 @@ void FiringServo(bool IsOn){
     FiredOff = true;
     FiredOn = false;
     Serial.println("Off");
+    shutterServo.detach();
   }else{
     shutterServo.write(ServoInit);
-    shutterServo.detach();
-    // digitalWrite(ServoPin, LOW);
+    //shutterServo.detach();
+    //digitalWrite(ServoPin, LOW);
     Serial.println("Neutral");
   }  
 }
@@ -128,10 +134,9 @@ boolean Connect(){
   digitalWrite(Ledblue, HIGH);
   delay(5000);
   
-  wifiManager.autoConnect("NodeMCU");
+  HasConn = wifiManager.autoConnect("NodeMCU");
   Serial.println("Connected!");
   delay(1500);
-  HasConn = true;
   return HasConn;
 }
 
@@ -143,10 +148,11 @@ void PrintTime(){
 
 void setup()
 {  
-  if(!HasConn){
+  //if(!HasConn){
     Connect();   
     timeClient.begin(); 
     timeClient.setTimeOffset(25200);  
+    delay(5000);
     timeClient.update();
 
     HH = timeClient.getHours();
@@ -155,7 +161,7 @@ void setup()
     PrintTime();
     digitalWrite(LedGreen, LOW);
     digitalWrite(Ledblue, LOW);
-  }
+  //}
 }
 
 int ToMilis(int hh, int mm){
@@ -189,19 +195,19 @@ void SetLightDay(int hh, int mm){
 void RunTime(){
   ss = ss + 1;
   delay(1000);
-  if (ss == 60)
+  if (ss >= 60)
   {
     ss = 0;
     MM = MM + 1;
   }
 
-  if (MM == 60)
+  if (MM >= 60)
   {
     MM = 0;
     HH = HH + 1;    
   }
 
-  if (HH == 24)
+  if (HH >= 24)
   {
     HH = 0;
   }    
@@ -224,17 +230,19 @@ void ButtonState(){
 }
 
 void TestServo(){
-  Serial.println("80");
-  shutterServo.write(45);
-  delay(500);
-  shutterServo.write(90);
-  delay(5000);
-  
-  Serial.println("100");
-  shutterServo.write(140);
-  delay(500);
-  shutterServo.write(90);
-  delay(5000);
+  shutterServo.attach(ServoPin);
+  Serial.println(String(TestSer));
+  shutterServo.write(TestSer);
+  delay(2000);
+  TestSer = TestSer + TestSeq;
+  if(TestSer > 180) 
+  {
+    TestSer = 0;
+    shutterServo.write(TestSer);
+    delay(2000);
+    shutterServo.detach();
+    delay(10000);
+  }
 }
 
 
@@ -242,6 +250,6 @@ void loop()
 {   
   RunTime();
   BlinkLights();
-  //PrintTime();  
-  //TestServo();
+  PrintTime();  
+  // TestServo();
 }
