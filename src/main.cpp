@@ -2,7 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
-#include <DNsserver.h>
+//#include <DNsserver.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <Time.h>
@@ -17,9 +17,9 @@
 
 // Define Servo Properties
 #define ServoPin  D4
-#define ServoOff  180
+#define ServoOff  120
 #define ServoInit 90
-#define ServoOn 0
+#define ServoOn 60
 
 // Define other Output
 #define Ledblue D7
@@ -54,30 +54,51 @@ int OffMinutes = 30;
 
 
 void initServo() {
+  Serial.println("Warm Up");
+  delay(2000);
+
+  Serial.println("Steady");
   shutterServo.attach(ServoPin); 
-  delay(1000); 
+  delay(2000); 
+
+  Serial.println("Neutral");
   shutterServo.write(ServoInit);  
-  delay(1000);
+  delay(2000);
+
+  Serial.println("On");
   shutterServo.write(ServoOn);  
-  delay(1000);
+  delay(2000);
+
+  Serial.println("Off");
   shutterServo.write(ServoOff); 
-  delay(1000);
+  delay(2000);
+
+  Serial.println("Neutral");
   shutterServo.write(ServoInit); 
-  delay(1000);
+  delay(2000);
+
+  Serial.println("Done");
   shutterServo.detach();
 }
 
 void FiringServo(bool IsOn){
   if(IsOn && !FiredOn){
+    shutterServo.attach(ServoPin); 
     shutterServo.write(ServoOn);
     FiredOn = true;
     FiredOff = false;
+    Serial.println("On");
   }else if(!IsOn && !FiredOff){
+    shutterServo.attach(ServoPin); 
     shutterServo.write(ServoOff);
     FiredOff = true;
     FiredOn = false;
+    Serial.println("Off");
   }else{
     shutterServo.write(ServoInit);
+    shutterServo.detach();
+    // digitalWrite(ServoPin, LOW);
+    Serial.println("Neutral");
   }  
 }
 
@@ -160,9 +181,9 @@ void SetLightDay(int hh, int mm){
 
   FiringServo(IsOn);
 
-  Serial.println("On : " + String(on));
-  Serial.println("Off : " + String(off));
-  Serial.println("Curr : " + String(currtime));
+  // Serial.println("On : " + String(on));
+  // Serial.println("Off : " + String(off));
+  // Serial.println("Curr : " + String(currtime));
 }
 
 void RunTime(){
@@ -189,7 +210,7 @@ void RunTime(){
 }
 
 void ButtonState(){
-  int button = digitalRead(ButtonTrigger);
+  //int button = digitalRead(ButtonTrigger);
 
   Serial.println(String(digitalRead(ButtonTrigger)));
 
@@ -201,10 +222,26 @@ void ButtonState(){
   //   analogWrite(OffLights, 0);
   // }
 }
+
+void TestServo(){
+  Serial.println("80");
+  shutterServo.write(45);
+  delay(500);
+  shutterServo.write(90);
+  delay(5000);
+  
+  Serial.println("100");
+  shutterServo.write(140);
+  delay(500);
+  shutterServo.write(90);
+  delay(5000);
+}
+
+
 void loop()
 {   
   RunTime();
   BlinkLights();
-  PrintTime();  
+  //PrintTime();  
+  //TestServo();
 }
-
