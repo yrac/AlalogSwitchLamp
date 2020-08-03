@@ -148,7 +148,6 @@ void PrintTime(){
 
 void setup()
 {  
-  //if(!HasConn){
     Connect();   
     timeClient.begin(); 
     timeClient.setTimeOffset(25200);  
@@ -161,9 +160,10 @@ void setup()
     PrintTime();
     digitalWrite(LedGreen, LOW);
     digitalWrite(Ledblue, LOW);
-  //}
 }
 
+//Function to convert time to milisecond
+//in order to get excact larger time as day time
 int ToMilis(int hh, int mm){
   int res = (hh * 60 * 60) + (mm * 60);
   return res;
@@ -175,11 +175,15 @@ void SetLightDay(int hh, int mm){
   int currtime = ToMilis(hh, mm);
   bool IsOn = false;
 
-  if(currtime >= on && currtime < off){ //Define Off Time
+  //Define Off Time
+  if(currtime >= on && currtime < off){ 
     OnLights =  Ledblue;
     OffLights = LedGreen;
     IsOn = false;
-  }else if(currtime >= off && currtime >= on){ //Define On Time
+
+  ///Define On Time
+  ///(currtime < on) is when your device activated around 1 AM above
+  }else if((currtime >= off && currtime >= on) || currtime < on){ 
     OnLights =  LedGreen;
     OffLights = Ledblue;
     IsOn = true;
