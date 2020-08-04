@@ -46,11 +46,14 @@ uint8_t OffLights = LedGreen;
 bool HasConn = false;
 bool FiredOn = false;
 bool FiredOff = false;
+bool IsOn = false;
 
 int OnHour = 17;
 int OnMinutes = 30;
 int OffHour = 5;
 int OffMinutes = 30;
+int LastUpdateHours = 0;
+int IntervalUpdate = 4;
 
 //Define Test Servo
 int TestSer = 0;
@@ -103,8 +106,8 @@ void FiringServo(bool IsOn){
   }else{
     shutterServo.write(ServoInit);
     //shutterServo.detach();
-    //digitalWrite(ServoPin, LOW);
-    Serial.println("Neutral");
+    digitalWrite(LED_BUILTIN, HIGH);
+    //Serial.println("Neutral");
   }  
 }
 
@@ -146,20 +149,26 @@ void PrintTime(){
   Serial.println("----------------------------");
 }
 
+void UpdateTime(){
+
+  timeClient.begin(); 
+  timeClient.setTimeOffset(25200);  
+  delay(5000);
+  timeClient.update();
+
+  HH = timeClient.getHours();
+  MM = timeClient.getMinutes();
+  ss = timeClient.getSeconds();  
+}
+
 void setup()
 {  
     Connect();   
-    timeClient.begin(); 
-    timeClient.setTimeOffset(25200);  
-    delay(5000);
-    timeClient.update();
-
-    HH = timeClient.getHours();
-    MM = timeClient.getMinutes();
-    ss = timeClient.getSeconds();  
+    UpdateTime();
     PrintTime();
     digitalWrite(LedGreen, LOW);
     digitalWrite(Ledblue, LOW);
+    WiFi.mode(WIFI_OFF);
 }
 
 //Function to convert time to milisecond
@@ -173,17 +182,15 @@ void SetLightDay(int hh, int mm){
   int off = ToMilis(OffHour, OffMinutes);
   int on = ToMilis(OnHour, OnMinutes);
   int currtime = ToMilis(hh, mm);
-  bool IsOn = false;
 
   //Define Off Time
-  if(currtime >= on && currtime < off){ 
+  if(currtime >= off && currtime < on){ 
     OnLights =  Ledblue;
     OffLights = LedGreen;
     IsOn = false;
 
   ///Define On Time
-  ///(currtime < on) is when your device activated around 1 AM above
-  }else if((currtime >= off && currtime >= on) || currtime < on){ 
+  }else if(!IsOn){
     OnLights =  LedGreen;
     OffLights = Ledblue;
     IsOn = true;
@@ -249,6 +256,12 @@ void TestServo(){
   }
 }
 
+void GetUpdateTime(){
+  if(HH - LastUpdateHours >= IntervalUpdate){
+    UpdateTime();
+    LastUpdateHours = HH;
+  }
+}
 
 void loop()
 {   
