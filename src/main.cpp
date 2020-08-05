@@ -109,6 +109,7 @@ Serial.println("Begin Test Light");
 analogWrite(LedGreen, 255);
 delay(1000);
 analogWrite(LedGreen, 0);
+delay(500);
 analogWrite(Ledblue, 255);
 delay(1000);
 analogWrite(Ledblue, 0);

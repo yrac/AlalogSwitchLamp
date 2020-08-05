@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 const double VCC = 3.3;             // NodeMCU on board 3.3v vcc
-const double R2 = 10000;            // 10k ohm series resistor
+const double R2 = 11000;            // 10k ohm series resistor
 const double adc_resolution = 1023; // 10-bit adc
 
 const double A = 0.001129148;   // thermistor equation parameters
