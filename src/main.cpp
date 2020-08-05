@@ -10,6 +10,8 @@
 #include <Timezone.h>
 #include <Servo.h>
 
+#include <Temp.h>
+
 // Define NTP properties
 #define NTP_OFFSET   60 * 60      // In seconds
 #define NTP_INTERVAL 60 * 1000    // In miliseconds
@@ -21,12 +23,15 @@
 #define ServoInit 90
 #define ServoOn 0
 
+
 // Define other Output
 #define Ledblue D7
 #define LedGreen D8
+#define Fan D2
 
 //Define other Input
 #define ButtonTrigger D1
+#define ntc A0
 
 // Set up the NTP UDP client
 WiFiUDP ntpUDP;
@@ -47,9 +52,12 @@ bool HasConn = false;
 bool FiredOn = false;
 bool FiredOff = false;
 bool IsOn = false;
+bool IsFanRun = false;
+int RunTimeFan = 60; //in second
+int FanRun = 0;
 
 int OnHour = 17;
-int OnMinutes = 30;
+int OnMinutes = 45;
 int OffHour = 5;
 int OffMinutes = 30;
 int LastUpdateHours = 0;
@@ -61,19 +69,19 @@ int TestSeq = 10;
 
 
 void initServo() {
-  Serial.println("Warm Up");
+  Serial.println("Begin Test Servo");
   delay(2000);
 
   Serial.println("Steady");
   shutterServo.attach(ServoPin); 
   delay(2000); 
 
-  Serial.println("Neutral");
-  shutterServo.write(ServoInit);  
-  delay(2000);
-
   Serial.println("On");
   shutterServo.write(ServoOn);  
+  delay(2000);
+
+  Serial.println("Neutral");
+  shutterServo.write(ServoInit);  
   delay(2000);
 
   Serial.println("Off");
@@ -84,31 +92,51 @@ void initServo() {
   shutterServo.write(ServoInit); 
   delay(2000);
 
-  Serial.println("Done");
+  Serial.println("End Test Servo");
   //shutterServo.detach();
 }
 
-void FiringServo(bool IsOn){
-  
+void initFan(){
+Serial.println("Begin Test Fan");
+digitalWrite(Fan, 255);
+delay(5000);
+digitalWrite(Fan, 0);
+Serial.println("End Test Fan");
+}
+
+void initLight(){
+Serial.println("Begin Test Light");
+analogWrite(LedGreen, 255);
+delay(1000);
+analogWrite(LedGreen, 0);
+analogWrite(Ledblue, 255);
+delay(1000);
+analogWrite(Ledblue, 0);
+Serial.println("End Test Light");
+}
+
+void FiringServo(bool IsOn){  
   if(IsOn && !FiredOn){
-    shutterServo.attach(ServoPin); 
+    delay(1000);
+    //shutterServo.attach(ServoPin); 
     shutterServo.write(ServoOn);
     FiredOn = true;
     FiredOff = false;
     Serial.println("On");
+    delay(1000);
+    shutterServo.write(ServoInit);
+    ss+=2;
   }else if(!IsOn && !FiredOff){
-    shutterServo.attach(ServoPin); 
+    delay(1000);
+    //shutterServo.attach(ServoPin); 
     shutterServo.write(ServoOff);
     FiredOff = true;
     FiredOn = false;
-    Serial.println("Off");
-    shutterServo.detach();
-  }else{
+    Serial.println("Off");    
+    delay(1000);
+    ss+=2;
     shutterServo.write(ServoInit);
-    //shutterServo.detach();
-    digitalWrite(LED_BUILTIN, HIGH);
-    //Serial.println("Neutral");
-  }  
+  }    
 }
 
 void Init(){
@@ -116,11 +144,15 @@ void Init(){
   pinMode(Ledblue, OUTPUT);
   pinMode(LedGreen, OUTPUT);
   pinMode(ButtonTrigger, INPUT);
+  pinMode(ntc, INPUT);
+  pinMode(Fan, OUTPUT);
   initServo();
+  initFan();
+  initLight();
 }
 
 void BlinkLights(){
-    digitalWrite(OffLights, LOW);
+    //digitalWrite(OffLights, LOW);
   if(ss % 2 == 1){
     LightStats = 100 + MM;
   }else{
@@ -133,8 +165,8 @@ boolean Connect(){
   Init();
   WiFiManager wifiManager;
 
-  digitalWrite(LedGreen, HIGH);
-  digitalWrite(Ledblue, HIGH);
+  analogWrite(LedGreen, 255);
+  analogWrite(Ledblue, 255);
   delay(5000);
   
   HasConn = wifiManager.autoConnect("NodeMCU");
@@ -166,8 +198,6 @@ void setup()
     Connect();   
     UpdateTime();
     PrintTime();
-    digitalWrite(LedGreen, LOW);
-    digitalWrite(Ledblue, LOW);
     WiFi.mode(WIFI_OFF);
 }
 
@@ -184,13 +214,13 @@ void SetLightDay(int hh, int mm){
   int currtime = ToMilis(hh, mm);
 
   //Define Off Time
-  if(currtime >= off && currtime < on){ 
+  if(currtime >= off && currtime <= on){ 
     OnLights =  Ledblue;
     OffLights = LedGreen;
     IsOn = false;
 
   ///Define On Time
-  }else if(!IsOn){
+  }else {//if(!IsOn){
     OnLights =  LedGreen;
     OffLights = Ledblue;
     IsOn = true;
@@ -263,10 +293,33 @@ void GetUpdateTime(){
   }
 }
 
+void RunFan(){
+  FanRun = FanRun >= RunTimeFan ? 0 : FanRun;
+  if(FanRun == 0){    
+    double temp = Temp(analogRead(ntc));
+    int speed = 0;
+    FanRun++;
+      if(temp >= 40 && temp <= 50){
+        speed = 200;
+      }else if(temp >= 50){
+        speed = 255;
+      }else{
+        FanRun = 0;
+      }      
+      digitalWrite(Fan, speed);
+      analogWrite(OffLights, speed);        
+  }else
+  {
+   FanRun++;
+  }
+}
+
 void loop()
 {   
   RunTime();
   BlinkLights();
   PrintTime();  
+  //Temp(analogRead(ntc));
+  RunFan();
   // TestServo();
 }
