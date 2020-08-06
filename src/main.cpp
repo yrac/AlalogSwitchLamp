@@ -9,6 +9,7 @@
 #include <TimeLib.h>
 #include <Timezone.h>
 #include <Servo.h>
+#include <Ubidots.h>
 
 #include <Temp.h>
 
@@ -23,6 +24,8 @@
 #define ServoInit 90
 #define ServoOn 0
 
+//Ubidots
+const char* UBIDOTS_TOKEN = "BBFF-kMyEA6VX6t7s8WoRgB127VcxCTFk6v";
 
 // Define other Output
 #define Ledblue D7
@@ -40,6 +43,9 @@ NTPClient timeClient(ntpUDP, NTP_ADDREss, NTP_OFFSET, NTP_INTERVAL);
 // Set up the servo
 Servo shutterServo;
 
+// Set up Ubidots
+Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
+
 //Global variable
 int HH = 0;
 int MM = 0;
@@ -55,7 +61,8 @@ bool IsOn = false;
 bool IsFanRun = false;
 int RunTimeFan = 60; //in second
 int FanRun = 0;
-
+int speed = 0;
+double temp = 0;
 int OnHour = 17;
 int OnMinutes = 45;
 int OffHour = 5;
@@ -199,7 +206,7 @@ void setup()
     Connect();   
     UpdateTime();
     PrintTime();
-    WiFi.mode(WIFI_OFF);
+    //WiFi.mode(WIFI_OFF);
 }
 
 //Function to convert time to milisecond
@@ -297,8 +304,7 @@ void GetUpdateTime(){
 void RunFan(){
   FanRun = FanRun >= RunTimeFan ? 0 : FanRun;
   if(FanRun == 0){    
-    double temp = Temp(analogRead(ntc));
-    int speed = 0;
+    temp = Temp(analogRead(ntc));    
     FanRun++;
       if(temp >= 40 && temp <= 50){
         speed = 200;
@@ -315,12 +321,42 @@ void RunFan(){
   }
 }
 
+void SendUbi(){
+if(WiFi.status()== WL_CONNECTED){
+    ubidots.add("FanSpeed", speed);// Change for your variable name  
+    ubidots.add("FanRunTime", FanRun);
+
+    ubidots.add("DateHH", HH);
+    ubidots.add("DateMM", MM);
+    ubidots.add("DateSS", ss);
+
+    ubidots.add("OnHour", OnHour);
+    ubidots.add("OnMinutes", OnMinutes);
+    ubidots.add("OffHour", OffHour);
+    ubidots.add("OffMinutes", OffMinutes);
+
+    ubidots.add("FiredOn", FiredOn);
+    ubidots.add("FiredOff", FiredOff);
+
+    ubidots.add("Temp", temp);
+
+    bool bufferSent = false;
+    bufferSent = ubidots.send(); // Will send data to a device label that matches the device Id
+
+    if (bufferSent) {
+    // Do something if values were sent properly
+    Serial.println("Ubi sent by the device");
+    }
+  }
+}
+
 void loop()
 {   
-  RunTime();
-  BlinkLights();
-  PrintTime();  
-  //Temp(analogRead(ntc));
-  RunFan();
+  // RunTime();
+  // BlinkLights();
+  // PrintTime();  
+  // //Temp(analogRead(ntc));
+  // RunFan();
   // TestServo();
+  SendUbi();
 }
