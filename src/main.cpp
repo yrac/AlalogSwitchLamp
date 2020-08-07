@@ -206,7 +206,7 @@ void setup()
     Connect();   
     UpdateTime();
     PrintTime();
-    //WiFi.mode(WIFI_OFF);
+    WiFi.mode(WIFI_OFF);
 }
 
 //Function to convert time to milisecond
@@ -307,14 +307,14 @@ void RunFan(){
     temp = Temp(analogRead(ntc));    
     FanRun++;
       if(temp >= 40 && temp <= 50){
-        speed = 200;
+        speed = 200;  
       }else if(temp >= 50){
         speed = 255;
       }else{
         FanRun = 0;
       }      
       digitalWrite(Fan, speed);
-      analogWrite(OffLights, speed);        
+      //analogWrite(OffLights, speed);        
   }else
   {
    FanRun++;
@@ -352,11 +352,11 @@ if(WiFi.status()== WL_CONNECTED){
 
 void loop()
 {   
-  // RunTime();
-  // BlinkLights();
-  // PrintTime();  
-  // //Temp(analogRead(ntc));
-  // RunFan();
-  // TestServo();
-  SendUbi();
+  RunTime();
+  BlinkLights();
+  PrintTime();  
+  //Temp(analogRead(ntc));
+  RunFan();
+  //TestServo();
+  //SendUbi();
 }
