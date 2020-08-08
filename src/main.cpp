@@ -123,10 +123,18 @@ analogWrite(Ledblue, 0);
 Serial.println("End Test Light");
 }
 
+void Event(bool state){
+  if(state){
+    analogWrite(OffLights, 255);
+  }else{
+    analogWrite(OffLights, 0);
+  }
+}
+
+
 void FiringServo(bool IsOn){  
   if(IsOn && !FiredOn){
-    delay(1000);
-    //shutterServo.attach(ServoPin); 
+    Event(true);
     shutterServo.write(ServoOn);
     FiredOn = true;
     FiredOff = false;
@@ -134,9 +142,9 @@ void FiringServo(bool IsOn){
     delay(1000);
     shutterServo.write(ServoInit);
     ss+=2;
+    Event(false);
   }else if(!IsOn && !FiredOff){
-    delay(1000);
-    //shutterServo.attach(ServoPin); 
+    Event(true);    
     shutterServo.write(ServoOff);
     FiredOff = true;
     FiredOn = false;
@@ -144,6 +152,7 @@ void FiringServo(bool IsOn){
     delay(1000);
     ss+=2;
     shutterServo.write(ServoInit);
+    Event(false);
   }    
 }
 
@@ -191,6 +200,9 @@ void PrintTime(){
 
 void UpdateTime(){
 
+  WiFi.mode(WIFI_RESUME);
+  
+  Event(true);
   timeClient.begin(); 
   timeClient.setTimeOffset(25200);  
   delay(5000);
@@ -199,6 +211,8 @@ void UpdateTime(){
   HH = timeClient.getHours();
   MM = timeClient.getMinutes();
   ss = timeClient.getSeconds();  
+  Event(false);
+  WiFi.mode(WIFI_OFF);
 }
 
 void setup()
@@ -312,6 +326,7 @@ void RunFan(){
         speed = 255;
       }else{
         FanRun = 0;
+        speed = 0;
       }      
       digitalWrite(Fan, speed);
       //analogWrite(OffLights, speed);        
@@ -319,6 +334,12 @@ void RunFan(){
   {
    FanRun++;
   }
+
+  if(speed > 0){
+    Event(true);
+  }else{
+    Event(false);
+  }  
 }
 
 void SendUbi(){
