@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#define ntc A0
+
 const double VCC = 3.3;             // NodeMCU on board 3.3v vcc
 const double R2 = 11000;            // 10k ohm series resistor
 const double adc_resolution = 1023; // 10-bit adc
@@ -21,6 +23,6 @@ double Temp(double AnalogRead){
   temperature = (1 / (A + (B * log(Rth)) + (C * pow((log(Rth)),3))));   // Temperature in kelvin
 
   temperature = temperature - 273.15;  // Temperature in degree celsius
-  Serial.println("Temperature = " + String(temperature));
+  Serial.println("Temp = " + String(temperature));
   return temperature;
 }
