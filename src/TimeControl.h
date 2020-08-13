@@ -27,24 +27,28 @@ int LastUpdateHours = 0;
 int IntervalUpdate = 5;
 
 void UpdateTime(){
-  WiFi.mode(WIFI_RESUME);  
-  //Event(true);
-  timeClient.begin(); 
-  timeClient.setTimeOffset(25200);  
-  delay(5000);
-  timeClient.update();
+  WiFi.mode(WIFI_RESUME);
+  delay(200);
+    if(WiFi.status() == WL_CONNECTED){  
+      //Event(true);
+      timeClient.begin(); 
+      timeClient.setTimeOffset(25200);  
+      delay(5000);
+      timeClient.update();
 
-  HH = timeClient.getHours();
-  MM = timeClient.getMinutes();
-  ss = timeClient.getSeconds();  
-  //Event(false);
-  WiFi.mode(WIFI_OFF);
+      HH = timeClient.getHours();
+      MM = timeClient.getMinutes();
+      ss = timeClient.getSeconds();  
+      //Event(false);
+      WiFi.mode(WIFI_OFF);
+  }
 }
 
 void GetUpdateTime(){
   if(LastUpdateHours >= IntervalUpdate){
     UpdateTime();
-    LastUpdateHours = 0;
+    LastUpdateHours = 0;    
+    State = "Update Time";
   }
 }
 
@@ -76,5 +80,7 @@ void RunTime(){
       }    
 
       SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
+      mm = 0;
     }
+    mm++;
 }

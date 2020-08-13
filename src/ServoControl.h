@@ -10,31 +10,31 @@
 bool FiredOn = false;
 bool FiredOff = false;
 
+String State;
 
 // Set up the servo
 Servo shutterServo;
 
 void FiringServo(bool IsOn){  
   if(IsOn && !FiredOn){
-    //Event(true);
     shutterServo.write(ServoOn);
     FiredOn = true;
     FiredOff = false;
     Serial.println("On");
-    delay(1000);
-    shutterServo.write(ServoInit);
-    //ss+=2;
-    //Event(false);
+    delay(500);
+    //shutterServo.write(ServoInit);
+    shutterServo.detach();
+    State = "Servo Firing to On ";
   }else if(!IsOn && !FiredOff){
-    //Event(true);    
+    if(shutterServo.attached()) shutterServo.attach(ServoPin);
+    delay(200);
     shutterServo.write(ServoOff);
     FiredOff = true;
     FiredOn = false;
     Serial.println("Off");    
-    delay(1000);
-    //ss+=2;
-    shutterServo.write(ServoInit);
-    //Event(false);
+    delay(500);
+    shutterServo.write(ServoInit);    
+    State = "Servo Firing to Off ";
   }    
 }
 

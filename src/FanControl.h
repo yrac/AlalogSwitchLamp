@@ -6,7 +6,7 @@ int FanRun = 0;
 int speed = 0;
 double temp = 0;
 bool IsFanRun = false;
-int RunTimeFan = 60; //in second
+int RunTimeFan = 60000; //in milisec
 
 
 void initFan(){
@@ -29,10 +29,12 @@ void RunFan(){
       }else{
         FanRun = 0;
         speed = 0;
+        State = "Idle Fan at " + String(speed) +" speed";
       }      
       digitalWrite(Fan, speed);    
   }else
   {
    FanRun++;
+   State = "Run Fan at " + String(speed) +" speed";
   }  
 }
