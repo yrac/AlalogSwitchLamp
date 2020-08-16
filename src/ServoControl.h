@@ -7,30 +7,23 @@
 #define ServoInit 90
 #define ServoOn 0
 
-bool FiredOn = false;
-bool FiredOff = false;
-
 String State;
 
 // Set up the servo
 Servo shutterServo;
 
 void FiringServo(bool IsOn){  
-  if(IsOn && !FiredOn){
+  if(IsOn){
     shutterServo.write(ServoOn);
-    FiredOn = true;
-    FiredOff = false;
     Serial.println("On");
     delay(500);
     //shutterServo.write(ServoInit);
     shutterServo.detach();
     State = "Servo Firing to On ";
-  }else if(!IsOn && !FiredOff){
+  }else{
     if(shutterServo.attached()) shutterServo.attach(ServoPin);
     delay(200);
     shutterServo.write(ServoOff);
-    FiredOff = true;
-    FiredOn = false;
     Serial.println("Off");    
     delay(500);
     shutterServo.write(ServoInit);    

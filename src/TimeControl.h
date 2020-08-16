@@ -2,8 +2,8 @@
 #include <TimeLib.h>
 #include <Timezone.h>
 #include <NTPClient.h>
-#include <services/WifiServices.h>
 #include <helper/Common.h>
+#include <services/WifiServices.h>
 
 // Define NTP properties
 #define NTP_OFFSET   60 * 60      // In seconds
@@ -27,21 +27,28 @@ int LastUpdateHours = 0;
 int IntervalUpdate = 5;
 
 void UpdateTime(){
-  WiFi.mode(WIFI_RESUME);
-  delay(200);
-    if(WiFi.status() == WL_CONNECTED){  
-      //Event(true);
-      timeClient.begin(); 
-      timeClient.setTimeOffset(25200);  
-      delay(5000);
-      timeClient.update();
+  int returndelay = 2000; //in second
+  WiFi.mode(WIFI_STA);
+  delay(returndelay);
 
-      HH = timeClient.getHours();
-      MM = timeClient.getMinutes();
-      ss = timeClient.getSeconds();  
-      //Event(false);
-      WiFi.mode(WIFI_OFF);
-  }
+  Serial.println(WiFi.status());   
+  if(WiFi.status() == WL_CONNECTED){  
+    Serial.print("Woke up and update time");
+    timeClient.begin(); 
+    timeClient.setTimeOffset(25200);  
+    delay(5000);
+    timeClient.update();
+
+    HH = timeClient.getHours();
+    MM = timeClient.getMinutes();
+    ss = timeClient.getSeconds();  
+    //Event(false);
+    //WiFi.mode(WIFI_OFF);
+  }else
+  {
+   ss += returndelay > 0? returndelay : ss;
+   LastUpdateHours = IntervalUpdate;
+  }  
 }
 
 void GetUpdateTime(){
@@ -59,28 +66,25 @@ void PrintTime(){
 }
 
 void RunTime(){
-  if(mm >= 1000){
-      ss = ss + 1;
-      if (ss >= 60)
-      {
-        ss = 0;
-        MM++;
-      }
-
-      if (MM >= 60)
-      {
-        MM = 0;
-        HH++;
-        LastUpdateHours++;    
-      }
-
-      if (HH >= 24)
-      {
-        HH = 0;
-      }    
-
-      SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
-      mm = 0;
+    ss++;
+    if (ss >= 60)
+    {
+      int overtime = ss - 60;
+      ss = overtime > 0 ? overtime : 0;           
+      MM++;
     }
-    mm++;
+
+    if (MM >= 60)
+    {
+      MM = 0;
+      HH++;
+      LastUpdateHours++;    
+    }
+
+    if (HH >= 24)
+    {
+      HH = 0;
+    }    
+
+    SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
 }

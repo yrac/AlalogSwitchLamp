@@ -17,14 +17,16 @@ void initFan(){
     Serial.println("End Test Fan");
 }
 
-void RunFan(){
+void RunFan(bool IsRun = false){
   FanRun = FanRun >= RunTimeFan ? 0 : FanRun;
-  if(FanRun == 0){    
+  if(FanRun == 0 || IsRun){    
     temp = Temp(analogRead(ntc));    
     FanRun++;
       if(temp >= 40 && temp <= 50){
         speed = 200;  
       }else if(temp >= 50){
+        speed = 255;
+      }else if(IsRun){
         speed = 255;
       }else{
         FanRun = 0;
@@ -32,6 +34,7 @@ void RunFan(){
         State = "Idle Fan at " + String(speed) +" speed";
       }      
       digitalWrite(Fan, speed);    
+      analogWrite(OffLights, speed);
   }else
   {
    FanRun++;

@@ -7,8 +7,11 @@
 int LightBright = 150;
 int LightStats = 0;
 bool IsOn = false;
+bool FiringOn = false;
+bool isInit = true;
 uint8_t OnLights = Ledblue;
 uint8_t OffLights = LedGreen;
+int savesecond = 0;
 
 
 void initLight(){
@@ -25,20 +28,25 @@ void initLight(){
 
 void BlinkLights(int second){
   if(second % 2 == 1){
-    LightStats = 100 + second;
+    LightStats = 130 + (second * 2);
   }else{
     LightStats = 0;
   }  
   analogWrite(OnLights, LightStats);
 }
 
-void SetLightDay(int milcur, int miloff, int milon){   
-  int off = miloff;
-  int on = milon;
+void ResetLinght(){
+  analogWrite(OnLights, 0);
+  analogWrite(OffLights, 0);
+}
+
+void SetLightDay(int milcur, int miloff, int milon){
+  int sunrise = miloff;
+  int sunset = milon;
   int currtime = milcur;
 
   //Define Off Time
-  if(currtime >= off && currtime <= on){ 
+  if(currtime >= sunrise && currtime <= sunset){ 
     OnLights =  Ledblue;
     OffLights = LedGreen;
     IsOn = false;
@@ -50,5 +58,9 @@ void SetLightDay(int milcur, int miloff, int milon){
     IsOn = true;
   }
 
-  FiringServo(IsOn);
+  if(IsOn != FiringOn || isInit){
+    FiringServo(IsOn);
+    FiringOn = IsOn; 
+    isInit = false;
+  } 
 }

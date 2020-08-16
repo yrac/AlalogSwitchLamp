@@ -26,6 +26,7 @@ void Event(bool state){
 
 void Init(){
   Serial.begin(9600);  
+  //Serial.begin(115200);  
   pinMode(Ledblue, OUTPUT);
   pinMode(LedGreen, OUTPUT);
   pinMode(ButtonTrigger, INPUT);
@@ -38,11 +39,11 @@ void Init(){
 
 void setup()
 {  
-    Init();
+    Init();    
     Connect();   
     UpdateTime();
     PrintTime();
-    WiFi.mode(WIFI_OFF);
+    //WiFi.mode(WIFI_OFF);
 }
 
 void ButtonState(){
@@ -59,11 +60,26 @@ void ButtonState(){
   // }
 }
 
+ 
+void LocalServer(){
+  using namespace std;
+  bool GetFan, GetServo, GetClient;
+  tie(GetClient, GetFan, GetServo) =  SendGetInfo(temp, String(HH) +":"+ MM +":"+ ss);
+  if(GetClient){
+    RunFan(GetFan);
+    FiringServo(GetServo);
+  }
+}
+
 void loop()
-{   
+{  
+  delay(900);   
   RunTime();
   BlinkLights(ss);
   PrintTime();  
   RunFan();
+  LocalServer();
+  // RunFan(GetFan);
   //SendUbi();
+  //LocalServer();
 }
