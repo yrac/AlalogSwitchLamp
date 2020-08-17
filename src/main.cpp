@@ -1,8 +1,9 @@
+#include <FS.h>  
 #include <Arduino.h>
 //#include <services/WifiServices.h>
 #include <LightsControl.h>
 #include <TimeControl.h>
-#include <FanControl.h>
+// #include <FanControl.h>
 #include <services/RepositoryServices.h>
 
 //Ubidots
@@ -11,6 +12,8 @@
 //Define other Input
 #define ButtonTrigger D1
 
+String StateTime = "";
+String StateDate = "";
 // Set up Ubidots
 //Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
 
@@ -35,6 +38,7 @@ void Init(){
   initServo();
   initFan();
   initLight();
+  InitWebServer();
 }
 
 void setup()
@@ -42,7 +46,6 @@ void setup()
     Init();    
     Connect();   
     UpdateTime();
-    PrintTime();
     //WiFi.mode(WIFI_OFF);
 }
 
@@ -61,25 +64,16 @@ void ButtonState(){
 }
 
  
-void LocalServer(){
-  using namespace std;
-  bool GetFan, GetServo, GetClient;
-  tie(GetClient, GetFan, GetServo) =  SendGetInfo(temp, String(HH) +":"+ MM +":"+ ss);
-  if(GetClient){
-    RunFan(GetFan);
-    FiringServo(GetServo);
-  }
+void AnotherCheck(){
+  CheckConnection();
 }
 
 void loop()
 {  
-  delay(900);   
+  delay(999);  
+  RunFan(); 
   RunTime();
   BlinkLights(ss);
-  PrintTime();  
-  RunFan();
-  LocalServer();
-  // RunFan(GetFan);
-  //SendUbi();
-  //LocalServer();
+  GetUpdateTime();   
+  AnotherCheck();
 }

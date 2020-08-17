@@ -52,15 +52,18 @@ void SetLightDay(int milcur, int miloff, int milon){
     IsOn = false;
 
   ///Define On Time
-  }else {//if(!IsOn){
+  }else {//if(currtime >= sunset) {//if(!IsOn){
     OnLights =  LedGreen;
     OffLights = Ledblue;
     IsOn = true;
   }
 
-  if(IsOn != FiringOn || isInit){
-    FiringServo(IsOn);
-    FiringOn = IsOn; 
-    isInit = false;
+if(isInit){
+  FiringServo(IsOn);
+  FiringOn = IsOn; 
+  isInit = false;
+}else if(IsOn != FiringOn){
+  FiringServo(IsOn);
+  FiringOn = IsOn; 
   } 
 }

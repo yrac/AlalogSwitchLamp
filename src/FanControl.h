@@ -6,7 +6,7 @@ int FanRun = 0;
 int speed = 0;
 double temp = 0;
 bool IsFanRun = false;
-int RunTimeFan = 60000; //in milisec
+int RunTimeFan = 60; //in milisec
 
 
 void initFan(){
@@ -17,17 +17,13 @@ void initFan(){
     Serial.println("End Test Fan");
 }
 
-void RunFan(bool IsRun = false){
-  FanRun = FanRun >= RunTimeFan ? 0 : FanRun;
-  if(FanRun == 0 || IsRun){    
-    temp = Temp(analogRead(ntc));    
-    FanRun++;
-      if(temp >= 40 && temp <= 50){
+void RunFan(){
+  temp = Temp(analogRead(ntc));    
+  if(FanRun == 0){        
+    FanRun--;
+      if(temp >= 37 && temp <= 50){
         speed = 200;  
-      }else if(temp >= 50){
-        speed = 255;
-      }else if(IsRun){
-        speed = 255;
+        FanRun += RunTimeFan;
       }else{
         FanRun = 0;
         speed = 0;
@@ -37,7 +33,8 @@ void RunFan(bool IsRun = false){
       analogWrite(OffLights, speed);
   }else
   {
-   FanRun++;
+    if(FanRun <= 55) speed += FanRun;
+   FanRun--;
    State = "Run Fan at " + String(speed) +" speed";
   }  
 }

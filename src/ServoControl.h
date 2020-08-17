@@ -3,9 +3,10 @@
 
 // Define Servo Properties
 #define ServoPin  D4
-#define ServoOff  180
-#define ServoInit 90
-#define ServoOn 0
+int ServoOff  = 180;
+int ServoInit = 90;
+int ServoOn = 0;
+extern int ServoState = 0;
 
 String State;
 
@@ -14,21 +15,25 @@ Servo shutterServo;
 
 void FiringServo(bool IsOn){  
   if(IsOn){
-    shutterServo.write(ServoOn);
+    if(!shutterServo.attached()) shutterServo.attach(ServoPin);
+    ServoState = ServoOn;
     Serial.println("On");
-    delay(500);
-    //shutterServo.write(ServoInit);
-    shutterServo.detach();
+    //delay(500);
+    //shutterServo.detach();
     State = "Servo Firing to On ";
+    //shutterServo.detach();
   }else{
-    if(shutterServo.attached()) shutterServo.attach(ServoPin);
-    delay(200);
-    shutterServo.write(ServoOff);
+    if(!shutterServo.attached()) shutterServo.attach(ServoPin);
+    ServoState = ServoOff;
     Serial.println("Off");    
-    delay(500);
-    shutterServo.write(ServoInit);    
+    //delay(500);
+    //shutterServo.write(ServoInit);    
     State = "Servo Firing to Off ";
   }    
+  shutterServo.write(ServoState);
+  delay(1000);
+  shutterServo.detach();
+  
 }
 
 void initServo() {

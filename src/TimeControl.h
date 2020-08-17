@@ -25,10 +25,39 @@ int OffHour = 5;
 int OffMinutes = 30;
 int LastUpdateHours = 0;
 int IntervalUpdate = 5;
+unsigned long epochTime = 0;
+//Week Days
+String weekDays[7]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+//Month names
+String months[12]={"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+extern String StateTime, StateDate ;
+
+
+void ProcedEpochTime(){
+  struct tm *ptm = gmtime ((time_t *)&epochTime);
+
+  int monthDay = ptm->tm_mday;
+  int currentMonth = ptm->tm_mon+1;
+  int currentYear = ptm->tm_year+1900;
+
+  HH = ptm->tm_hour;
+  MM = ptm->tm_min;
+  ss = ptm->tm_sec;  
+
+  StateDate = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
+
+  StateTime = String(HH) +":"+ MM +":"+ ss;
+  Serial.println("----------------------------");
+  Serial.println("Current Date : "+ StateDate);
+  Serial.println("Current Time : "+ StateTime);
+  Serial.println("----------------------------");
+}
 
 void UpdateTime(){
   int returndelay = 2000; //in second
-  WiFi.mode(WIFI_STA);
+  //WiFi.mode(WIFI_STA);
   delay(returndelay);
 
   Serial.println(WiFi.status());   
@@ -38,53 +67,49 @@ void UpdateTime(){
     timeClient.setTimeOffset(25200);  
     delay(5000);
     timeClient.update();
-
-    HH = timeClient.getHours();
-    MM = timeClient.getMinutes();
-    ss = timeClient.getSeconds();  
-    //Event(false);
-    //WiFi.mode(WIFI_OFF);
+    
+    epochTime = timeClient.getEpochTime();
+    ProcedEpochTime();    
+    LastUpdateHours = 0; 
   }else
   {
-   ss += returndelay > 0? returndelay : ss;
+   epochTime += returndelay > 0? returndelay : epochTime;
    LastUpdateHours = IntervalUpdate;
   }  
 }
 
 void GetUpdateTime(){
   if(LastUpdateHours >= IntervalUpdate){
-    UpdateTime();
-    LastUpdateHours = 0;    
+    UpdateTime();   
     State = "Update Time";
   }
 }
 
-void PrintTime(){
-  Serial.println("----------------------------");
-  Serial.println("Time is : "+ String(HH) +":"+ MM +":"+ ss);
-  Serial.println("----------------------------");
-}
 
 void RunTime(){
-    ss++;
-    if (ss >= 60)
-    {
-      int overtime = ss - 60;
-      ss = overtime > 0 ? overtime : 0;           
-      MM++;
-    }
+  #pragma region Old
+    // ss++;
+    // if (ss >= 60)
+    // {
+    //   int overtime = ss - 60;
+    //   ss = overtime > 0 ? overtime : 0;           
+    //   MM++;
+    // }
 
-    if (MM >= 60)
-    {
-      MM = 0;
-      HH++;
-      LastUpdateHours++;    
-    }
+    // if (MM >= 60)
+    // {
+    //   MM = 0;
+    //   HH++;
+    //   LastUpdateHours++;    
+    // }
 
-    if (HH >= 24)
-    {
-      HH = 0;
-    }    
+    // if (HH >= 24)
+    // {
+    //   HH = 0;
+    // }    
+#pragma endregion
 
-    SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
+  epochTime++;
+  ProcedEpochTime();
+  SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
 }
