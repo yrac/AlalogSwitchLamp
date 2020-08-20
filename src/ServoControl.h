@@ -6,14 +6,15 @@
 int ServoOff  = 180;
 int ServoInit = 90;
 int ServoOn = 0;
-extern int ServoState = 0;
-
+int ServoState = 0;
+bool ServoChecked = false;
 String State;
 
 // Set up the servo
 Servo shutterServo;
 
 void FiringServo(bool IsOn){  
+  int wait = 1000;
   if(IsOn){
     if(!shutterServo.attached()) shutterServo.attach(ServoPin);
     ServoState = ServoOn;
@@ -30,10 +31,8 @@ void FiringServo(bool IsOn){
     //shutterServo.write(ServoInit);    
     State = "Servo Firing to Off ";
   }    
-  shutterServo.write(ServoState);
-  delay(1000);
-  shutterServo.detach();
-  
+  shutterServo.write(ServoState); 
+  ServoChecked = false;   
 }
 
 void initServo() {
@@ -62,4 +61,18 @@ void initServo() {
 
   Serial.println("End Test Servo");
   //shutterServo.detach();
+}
+
+void CheckServo(){
+  if(!ServoChecked){
+    if(!shutterServo.attached()){ 
+      shutterServo.attach(ServoPin)
+    }
+
+    if(shutterServo.read() != ServoInit){
+      shutterServo.write(ServoInit);
+      shutterServo.detach();
+      ServoChecked = true;
+    }
+  }
 }

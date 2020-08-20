@@ -33,32 +33,46 @@ const char index_html[] PROGMEM = R"rawliteral(
         vertical-align: middle;
         padding-bottom: 15px;
     }
+    .info{
+        font-size: 1.2rem;
+    }
     </style>
 </head>
 
 <body>
     <h2>Auto Analog Lamp</h2>
+   
+        <i class="fas fa-plug info" style="color:#5e6dd7;"></i>        
+        <span id="runninghours" class="info">%RUNNINGHOURS%</span><span class="info"> Hour(s)</span>
+        <span id="runningminutes" class="info">%RUNNINGMINUTES%</span><span class="info"> Minutes(s)</span>
+    &nbsp
+        <i class="fas fa-broadcast-tower info" style="color:#5e6dd7;"></i>
+        <span id="lastupdate" class="info">%LASTUPDATE%</span>
+    </br>
+        <i class="far fa-calendar-alt info" style="color:#5e6dd7;"></i>
+        <span id="date" class="info">%DATE%</span>
     <p>
         <i class="far fa-clock" style="color:#5e6dd7;"></i>
-        <span class="dht-labels">Time</span>
         <span id="clock">%CLOCK%</span>
-    </p><p>
+    </p>
+    <p>
         <i class="fas fa-thermometer-half" style="color:#5e6dd7;"></i>
-        <span class="dht-labels">Temperature</span>
         <span id="temperature">%TEMPERATURE%</span>
         <sup class="units">&deg;C</sup>
     </p>
     <p>
         <i class="fas fa-fan" style="color:#5e6dd7;"></i>
-        <span class="dht-labels">Fan</span>
         <span id="fan">%FAN%</span>
-        <sup class="units">%</sup>
+        <sup class="units">&#37;</sup>
     </p>
     <p>
         <i class="fas fa-drafting-compass" style="color:#5e6dd7;"></i>
-        <span class="dht-labels">Servo</span>
         <span id="servo">%SERVO%</span>
         <sup class="units">&deg;</sup>
+    </p>
+    <p>
+        <i class="fas fa-info" style="color:#5e6dd7;"></i>
+        <span id="info">%INFO%</span>
     </p>
     
 </body>
@@ -67,8 +81,17 @@ setInterval(function() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("temperature").innerHTML = this.data.Temp;
-            document.getElementById("clock").innerHTML = this.responseText;
+            var obj =this.responseText;
+            var jobj = JSON.parse(obj);
+            document.getElementById("temperature").innerHTML = jobj.Temperature;
+            document.getElementById("clock").innerHTML = jobj.Clock;
+            document.getElementById("date").innerHTML = jobj.Date;
+            document.getElementById("fan").innerHTML = jobj.Fan;
+            document.getElementById("servo").innerHTML = jobj.Servo;
+            document.getElementById("lastupdate").innerHTML = jobj.LastUpdate;
+            document.getElementById("runninghours").innerHTML = jobj.RunningHour; 
+            document.getElementById("runningminutes").innerHTML = jobj.RunningMinutes;                        
+            document.getElementById("info").innerHTML = jobj.Info;                        
         }
     };
     xhttp.open("GET", "/getstate", true);
@@ -76,5 +99,5 @@ setInterval(function() {
 }, 10000);
 </script>
 
-</html>)
+</html>
 )rawliteral";

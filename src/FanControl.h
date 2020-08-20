@@ -21,20 +21,20 @@ void RunFan(){
   temp = Temp(analogRead(ntc));    
   if(FanRun == 0){        
     FanRun--;
-      if(temp >= 37 && temp <= 50){
+      if(temp >= 40 && temp <= 50){
         speed = 200;  
         FanRun += RunTimeFan;
       }else{
         FanRun = 0;
         speed = 0;
         State = "Idle Fan at " + String(speed) +" speed";
-      }      
-      digitalWrite(Fan, speed);    
+      }              
       analogWrite(OffLights, speed);
   }else
   {
-    if(FanRun <= 55) speed += FanRun;
+    if(FanRun <= 55) speed = speed + FanRun;
    FanRun--;
    State = "Run Fan at " + String(speed) +" speed";
   }  
+  digitalWrite(Fan, speed);  
 }

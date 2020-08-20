@@ -26,16 +26,18 @@ int OffMinutes = 30;
 int LastUpdateHours = 0;
 int IntervalUpdate = 5;
 unsigned long epochTime = 0;
+bool needupdate = false;
 //Week Days
 String weekDays[7]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 //Month names
 String months[12]={"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
-extern String StateTime, StateDate ;
+extern String StateTime, StateDate, LastUpdate ;
 
 
 void ProcedEpochTime(){
+
   struct tm *ptm = gmtime ((time_t *)&epochTime);
 
   int monthDay = ptm->tm_mday;
@@ -56,10 +58,6 @@ void ProcedEpochTime(){
 }
 
 void UpdateTime(){
-  int returndelay = 2000; //in second
-  //WiFi.mode(WIFI_STA);
-  delay(returndelay);
-
   Serial.println(WiFi.status());   
   if(WiFi.status() == WL_CONNECTED){  
     Serial.print("Woke up and update time");
@@ -70,16 +68,16 @@ void UpdateTime(){
     
     epochTime = timeClient.getEpochTime();
     ProcedEpochTime();    
-    LastUpdateHours = 0; 
+    LastUpdate =  StateDate +" "+ StateTime;
+    needupdate = false;
   }else
   {
-   epochTime += returndelay > 0? returndelay : epochTime;
-   LastUpdateHours = IntervalUpdate;
+   needupdate = true;
   }  
 }
 
 void GetUpdateTime(){
-  if(LastUpdateHours >= IntervalUpdate){
+  if(HH % IntervalUpdate == 0 || needupdate){
     UpdateTime();   
     State = "Update Time";
   }
@@ -113,3 +111,4 @@ void RunTime(){
   ProcedEpochTime();
   SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
 }
+

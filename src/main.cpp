@@ -14,6 +14,9 @@
 
 String StateTime = "";
 String StateDate = "";
+String LastUpdate = "";
+unsigned long loopmilis = 0;
+int loopinterval = 1000;
 // Set up Ubidots
 //Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
 
@@ -46,34 +49,23 @@ void setup()
     Init();    
     Connect();   
     UpdateTime();
-    //WiFi.mode(WIFI_OFF);
 }
-
-void ButtonState(){
-  //int button = digitalRead(ButtonTrigger);
-
-  //Serial.println(String(digitalRead(ButtonTrigger)));
-
-  // if (button == HIGH) {
-  //   // turn LED on:
-  //   analogWrite(OffLights, 200);
-  // } else {
-  //   // turn LED off:
-  //   analogWrite(OffLights, 0);
-  // }
-}
-
  
 void AnotherCheck(){
   CheckConnection();
+  CheckServo();  
+  GetUpdateTime();   
 }
 
 void loop()
 {  
-  delay(999);  
-  RunFan(); 
-  RunTime();
-  BlinkLights(ss);
-  GetUpdateTime();   
-  AnotherCheck();
+  if(millis() == 0) loopmilis = 0;
+  if(millis() >= (loopmilis + loopinterval)){
+    loopmilis += loopinterval;
+    RunFan(); 
+    RunTime();
+    BlinkLights(ss);
+    AnotherCheck();
+  }
 }
+

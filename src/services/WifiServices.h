@@ -25,23 +25,16 @@ String htmlservo = "";
 String htmlclosing = "</div></body></html>";
 String htmlcurtime = "";
  
-String request = "";
+//String request = "";
 String ResponseBody ="";
-extern String StateTime, StateDate ;
+extern String StateTime, StateDate, LastUpdate ;
 extern int ServoState;
 
 String processor(const String& var){
   //Serial.println(var);
-  if(var == "TEMPERATURE"){
+  if(var == "GETSTATE"){
     return String(temp);
   }
-  else if(var == "FAN"){
-    return String(speed);
-  }
-  else if(var == "SERVO"){
-    return String(ServoState);
-  }
-  return String();
 }
 
 void saveConfigCallback () {
@@ -51,27 +44,27 @@ void saveConfigCallback () {
 
 void InitWebServer(){
 
-  ResponseBody = "{\n    \"Clock\": \""+StateTime+"\",\n    \"Temperature\": \""+StateTime+"\",\n    \"Fan\": \""+StateTime+"\",\n    \"Servo\": \""+StateTime+"\"\n}";
-
-
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
   });
 
   server.on("/getstate", HTTP_GET, [](AsyncWebServerRequest *request){
-    AsyncJsonResponse * response = new AsyncJsonResponse();
-    //response->addHeader("Server","ESP Async Web Server");
-    JsonObject& root = response->getRoot();
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject &root = jsonBuffer.createObject();
     root["Clock"] = StateTime;
     root["Date"] = StateDate;
+    root["Temperature"] = round(temp);
     root["Fan"] = speed;
-    root["Temp"] = temperature;
     root["Servo"] = ServoState;
-    
-    response->setLength();
-    request->send(response);
-  });
+    root["LastUpdate"] = LastUpdate;
+    root["RunningHour"] =  (( millis()/1000 ) / 60 ) / 60;
+    root["RunningMinutes"] = (millis()/1000 ) / 60;
+    root["Info"] = State;
+    root.printTo(*response);
+    request->send(response);  
+    });
 
   server.begin();
 }
@@ -100,73 +93,6 @@ boolean Connect(){
   //WiFi.mode(WIFI_OFF);
   return HasConn;
 }
-
-#pragma region OLD
-// std::tuple<bool, bool, bool> SendGetInfo(double temp, String time){ //tuple<IsClientConn, IsFanRun, IsServoOnPossition>
-//    // Check if a client has connected
-//     WiFiClient client = server.available();
-//     bool IsFanRun, IsServoOnPossition;
-//     bool IsClientAction = false;
-//     if (client)
-//     {
-//           // Read the first line of the request
-//           request = client.readStringUntil('\r');
-//           IsClientAction = request.length() > 14;
-
-//           Serial.println("request:");
-//           Serial.println(request);
-//           Serial.println("request length:");
-//           Serial.println(request.length());
- 
-//           if       ( request.indexOf("FANON") > 0 )  { IsFanRun = true;      }
-//           else if  ( request.indexOf("FANOFF") > 0 ) { IsFanRun = false;      }
-         
-
-//           if       ( request.indexOf("SERVOON") > 0 && IsOn)  { IsServoOnPossition = true;      }
-//           else if  ( request.indexOf("SERVOOF") > 0 && !IsOn) { IsServoOnPossition = false;      }
-          
-
-//           if (IsFanRun) 
-//           {
-//             htmlfan = "<form id='F1' action='FANOFF'><input class='button' type='submit' value='Turn Off Fan' ></form><br>";
-//           }
-//           else                              
-//           {
-//             htmlfan = "<form id='F1' action='FANON'><input class='button' type='submit' value='Turn On Fan' ></form><br>";
-//           }
-
-//           if (!IsServoOnPossition) 
-//           {
-//             htmlservo = "<form id='F1' action='SERVOON'><input class='button' type='submit' value='Turn On Lights' ></form><br>";
-//           }
-//           else                              
-//           {
-//             htmlservo = "<form id='F1' action='SERVOOF'><input class='button' type='submit' value='Turn Off Lights' ></form><br>";
-//           }
- 
-//           htmltemp = "<h2>"+String(temp)+"</h2>";
-//           htmlcurtime = "<h1>"+time+"</h1>";
- 
-//           client.flush();
- 
-//           client.print( header );
-//           client.print( htmlopening );    
-//           client.print( htmlcurtime );
-//           client.print( htmltemp );
-//           client.print( htmlfan );
-//           client.print( htmlservo );
-//           client.print( htmlclosing );
- 
-//           delay(5);
-//           client.println("<meta http-equiv='refresh' content='10'>");
- 
-//          // The client will actually be disconnected when the function returns and 'client' object is detroyed
- 
-//     }
-//     return std::make_tuple(IsClientAction, IsFanRun, IsServoOnPossition);
-// }
-#pragma endregion
-
 
 void CheckConnection(){
   uint8_t pulledstate = LOW;
