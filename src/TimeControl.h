@@ -77,11 +77,17 @@ void UpdateTime(){
 }
 
 void GetUpdateTime(){
-  if(HH % IntervalUpdate == 0 || needupdate){
-    UpdateTime();   
-    State = "Update Time";
+    bool thru = false;
+
+    if(HH % IntervalUpdate == 0) thru = true;
+    if(needupdate) thru = true;    
+    else thru = false;
+
+    if(thru){
+      UpdateTime();   
+      State = "Update Time";
+    }
   }
-}
 
 
 void RunTime(){

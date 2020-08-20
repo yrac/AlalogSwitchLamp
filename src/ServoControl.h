@@ -66,7 +66,7 @@ void initServo() {
 void CheckServo(){
   if(!ServoChecked){
     if(!shutterServo.attached()){ 
-      shutterServo.attach(ServoPin)
+      shutterServo.attach(ServoPin);
     }
 
     if(shutterServo.read() != ServoInit){
