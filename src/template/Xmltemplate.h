@@ -43,8 +43,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <h2>Auto Analog Lamp</h2>
    
         <i class="fas fa-plug info" style="color:#5e6dd7;"></i>        
-        <span id="runninghours" class="info">%RUNNINGHOURS%</span><span class="info"> Hour(s)</span>
-        <span id="runningminutes" class="info">%RUNNINGMINUTES%</span><span class="info"> Minutes(s)</span>
+        <span id="uptime" class="info">%UPTIME%</span>
     &nbsp
         <i class="fas fa-broadcast-tower info" style="color:#5e6dd7;"></i>
         <span id="lastupdate" class="info">%LASTUPDATE%</span>
@@ -89,14 +88,13 @@ setInterval(function() {
             document.getElementById("fan").innerHTML = jobj.Fan;
             document.getElementById("servo").innerHTML = jobj.Servo;
             document.getElementById("lastupdate").innerHTML = jobj.LastUpdate;
-            document.getElementById("runninghours").innerHTML = jobj.RunningHour; 
-            document.getElementById("runningminutes").innerHTML = jobj.RunningMinutes;                        
+            document.getElementById("uptime").innerHTML = jobj.UpTime;                       
             document.getElementById("info").innerHTML = jobj.Info;                        
         }
     };
     xhttp.open("GET", "/getstate", true);
     xhttp.send();
-}, 10000);
+}, 3000);
 </script>
 
 </html>

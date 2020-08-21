@@ -1,8 +1,10 @@
+#include <FS.h> 
 #include <TempControl.h>
+ 
 
 #define Fan D2
 
-int FanRun = 0;
+extern int FanRun;
 int speed = 0;
 double temp = 0;
 bool IsFanRun = false;
@@ -27,14 +29,18 @@ void RunFan(){
       }else{
         FanRun = 0;
         speed = 0;
-        State = "Idle Fan at " + String(speed) +" speed";
       }              
       analogWrite(OffLights, speed);
   }else
   {
-    if(FanRun <= 55) speed = speed + FanRun;
+    if(temp > 37){
+       FanRun++;       
+    }
+    if(FanRun <= 55){
+      speed++;
+    }
    FanRun--;
-   State = "Run Fan at " + String(speed) +" speed";
+   //State = "Run Fan at " + String(speed) +" speed";
   }  
   digitalWrite(Fan, speed);  
 }

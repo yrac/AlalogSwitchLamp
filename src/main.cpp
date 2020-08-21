@@ -1,24 +1,20 @@
 #include <FS.h>  
 #include <Arduino.h>
-//#include <services/WifiServices.h>
+#include <services/FireBaseServices.h>
 #include <LightsControl.h>
 #include <TimeControl.h>
-// #include <FanControl.h>
 #include <services/RepositoryServices.h>
-
+#include <loopTimer.h>
 //Ubidots
 //const char* UBIDOTS_TOKEN = "BBFF-kMyEA6VX6t7s8WoRgB127VcxCTFk6v";
 
 //Define other Input
 #define ButtonTrigger D1
 
-String StateTime = "";
-String StateDate = "";
-String LastUpdate = "";
+String StateTime = "", StateDate = "", LastUpdate = "";
 unsigned long loopmilis = 0;
 int loopinterval = 1000;
-// Set up Ubidots
-//Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
+int FanRun = 0;
 
 //Global variable
 
@@ -42,6 +38,7 @@ void Init(){
   initFan();
   initLight();
   InitWebServer();
+  //InitFireBase();
 }
 
 void setup()
@@ -52,7 +49,7 @@ void setup()
 }
  
 void AnotherCheck(){
-  CheckConnection();
+  if(CheckConnection()) //CheckFireBase();
   CheckServo();  
   GetUpdateTime();   
 }

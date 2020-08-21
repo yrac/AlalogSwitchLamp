@@ -5,12 +5,14 @@
 #endif
 
 //#include <DNsserver.h>
+#include <FS.h>  
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
 #include <template/Xmltemplate.h>
 #include <FanControl.h>
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
+#include <uptime_formatter.h>
 
 AsyncWebServer server(80);
 DNSServer dns;
@@ -43,7 +45,6 @@ void saveConfigCallback () {
 }
 
 void InitWebServer(){
-
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
@@ -51,16 +52,15 @@ void InitWebServer(){
 
   server.on("/getstate", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncResponseStream *response = request->beginResponseStream("application/json");
-    DynamicJsonBuffer jsonBuffer;
+    DynamicJsonBuffer  jsonBuffer;
     JsonObject &root = jsonBuffer.createObject();
     root["Clock"] = StateTime;
     root["Date"] = StateDate;
     root["Temperature"] = round(temp);
     root["Fan"] = speed;
-    root["Servo"] = ServoState;
+    root["Servo"] = String(ServoState);
     root["LastUpdate"] = LastUpdate;
-    root["RunningHour"] =  (( millis()/1000 ) / 60 ) / 60;
-    root["RunningMinutes"] = (millis()/1000 ) / 60;
+    root["UpTime"] = uptime_formatter::getUptime();//  (( millis()/1000 ) / 60 ) / 60;
     root["Info"] = State;
     root.printTo(*response);
     request->send(response);  
@@ -94,13 +94,16 @@ boolean Connect(){
   return HasConn;
 }
 
-void CheckConnection(){
+bool CheckConnection(){
   uint8_t pulledstate = LOW;
+  bool res = false;
   if(WiFi.status() == WL_CONNECTED){  
     pulledstate = LOW;
+    res = true;
   }else
   {
     pulledstate = HIGH;
   }
   digitalWrite(LED_BUILTIN, pulledstate);
+  return res;
 }

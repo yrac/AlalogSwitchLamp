@@ -57,9 +57,8 @@ void ProcedEpochTime(){
   Serial.println("----------------------------");
 }
 
-void UpdateTime(){
-  Serial.println(WiFi.status());   
-  if(WiFi.status() == WL_CONNECTED){  
+void UpdateTime(){   
+  if(CheckConnection()){  
     Serial.print("Woke up and update time");
     timeClient.begin(); 
     timeClient.setTimeOffset(25200);  
@@ -69,9 +68,10 @@ void UpdateTime(){
     epochTime = timeClient.getEpochTime();
     ProcedEpochTime();    
     LastUpdate =  StateDate +" "+ StateTime;
+    LastUpdateHours = HH;
     needupdate = false;
-  }else
-  {
+    FiringOn = 0;
+  }else{
    needupdate = true;
   }  
 }
@@ -79,9 +79,8 @@ void UpdateTime(){
 void GetUpdateTime(){
     bool thru = false;
 
-    if(HH % IntervalUpdate == 0) thru = true;
-    if(needupdate) thru = true;    
-    else thru = false;
+    if(HH % IntervalUpdate == 0 && HH != LastUpdateHours) thru = true;
+    if(needupdate) thru = true;  
 
     if(thru){
       UpdateTime();   
@@ -91,28 +90,6 @@ void GetUpdateTime(){
 
 
 void RunTime(){
-  #pragma region Old
-    // ss++;
-    // if (ss >= 60)
-    // {
-    //   int overtime = ss - 60;
-    //   ss = overtime > 0 ? overtime : 0;           
-    //   MM++;
-    // }
-
-    // if (MM >= 60)
-    // {
-    //   MM = 0;
-    //   HH++;
-    //   LastUpdateHours++;    
-    // }
-
-    // if (HH >= 24)
-    // {
-    //   HH = 0;
-    // }    
-#pragma endregion
-
   epochTime++;
   ProcedEpochTime();
   SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <FS.h>  
 
 #define ntc A0
 

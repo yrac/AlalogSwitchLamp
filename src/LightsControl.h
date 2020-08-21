@@ -7,7 +7,7 @@
 int LightBright = 150;
 int LightStats = 0;
 bool IsOn = false;
-bool FiringOn = false;
+int FiringOn = 0; // 0 = Init, 1 = Has On, 2 Has Off
 bool isInit = true;
 uint8_t OnLights = Ledblue;
 uint8_t OffLights = LedGreen;
@@ -52,18 +52,15 @@ void SetLightDay(int milcur, int miloff, int milon){
     IsOn = false;
 
   ///Define On Time
-  }else {//if(currtime >= sunset) {//if(!IsOn){
+  }else {
     OnLights =  LedGreen;
     OffLights = Ledblue;
     IsOn = true;
   }
 
-if(isInit){
+
+ if(FiringOn != (IsOn ? 1 : 2)){
   FiringServo(IsOn);
-  FiringOn = IsOn; 
-  isInit = false;
-}else if(IsOn != FiringOn){
-  FiringServo(IsOn);
-  FiringOn = IsOn; 
+  FiringOn = IsOn ? 1 : 2; 
   } 
 }
