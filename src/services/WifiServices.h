@@ -30,7 +30,7 @@ String htmlcurtime = "";
 //String request = "";
 String ResponseBody ="";
 extern String StateTime, StateDate, LastUpdate ;
-extern int ServoState;
+extern int ServoState, FanRunElapsed;
 
 String processor(const String& var){
   //Serial.println(var);
@@ -56,8 +56,11 @@ void InitWebServer(){
     JsonObject &root = jsonBuffer.createObject();
     root["Clock"] = StateTime;
     root["Date"] = StateDate;
-    root["Temperature"] = round(temp);
+    root["Temperature"] = temp;
+    root["TemperatureMin"] = mintemp;
+    root["TemperatureMax"] = maxtemp;
     root["Fan"] = speed;
+    root["FanElapsed"] = (float)(FanRunElapsed / 60);    
     root["Servo"] = String(ServoState);
     root["LastUpdate"] = LastUpdate;
     root["UpTime"] = uptime_formatter::getUptime();//  (( millis()/1000 ) / 60 ) / 60;

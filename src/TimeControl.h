@@ -26,7 +26,7 @@ int OffMinutes = 30;
 int LastUpdateHours = 0;
 int IntervalUpdate = 5;
 unsigned long epochTime = 0;
-bool needupdate = false;
+bool needupdate = false, force = false;
 //Week Days
 String weekDays[7]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -71,6 +71,7 @@ void UpdateTime(){
     LastUpdateHours = HH;
     needupdate = false;
     FiringOn = 0;
+    force = true;
   }else{
    needupdate = true;
   }  
@@ -88,10 +89,9 @@ void GetUpdateTime(){
     }
   }
 
-
 void RunTime(){
   epochTime++;
   ProcedEpochTime();
   SetLightDay(ToMilis(HH, MM), ToMilis(OffHour, OffMinutes), ToMilis(OnHour, OnMinutes));
+  force = false;
 }
-

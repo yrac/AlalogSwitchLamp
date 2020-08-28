@@ -5,6 +5,7 @@
 #include <TimeControl.h>
 #include <services/RepositoryServices.h>
 #include <loopTimer.h>
+#include <millisDelay.h>
 //Ubidots
 //const char* UBIDOTS_TOKEN = "BBFF-kMyEA6VX6t7s8WoRgB127VcxCTFk6v";
 
@@ -12,10 +13,9 @@
 #define ButtonTrigger D1
 
 String StateTime = "", StateDate = "", LastUpdate = "";
-unsigned long loopmilis = 0;
-int loopinterval = 1000;
 int FanRun = 0;
-
+millisDelay delaycheck;
+millisDelay delayloop;
 //Global variable
 
 void Event(bool state){
@@ -46,6 +46,8 @@ void setup()
     Init();    
     Connect();   
     UpdateTime();
+    delaycheck.start(10000);
+    delayloop.start(1000);
 }
  
 void AnotherCheck(){
@@ -55,14 +57,18 @@ void AnotherCheck(){
 }
 
 void loop()
-{  
-  if(millis() == 0) loopmilis = 0;
-  if(millis() >= (loopmilis + loopinterval)){
-    loopmilis += loopinterval;
+{   
+  if(delayloop.justFinished()){
+    delayloop.repeat();
     RunFan(); 
     RunTime();
     BlinkLights(ss);
-    AnotherCheck();
   }
+  
+    if (delaycheck.justFinished()) {
+        delaycheck.repeat();
+        AnotherCheck();
+    }
 }
+
 

@@ -58,11 +58,24 @@ const char index_html[] PROGMEM = R"rawliteral(
         <i class="fas fa-thermometer-half" style="color:#5e6dd7;"></i>
         <span id="temperature">%TEMPERATURE%</span>
         <sup class="units">&deg;C</sup>
+        <sup class="units">
+            <label id="tempmin" style="color:#5e6dd7;">%TEMPERATUREMIN% </label>
+            &#9731;
+        </sup>
+         <sup class="units">
+            <label id="tempmax" style="color:#f7030e;">%TEMPERATUREMAX% </label>
+            &#x2620;
+        </sup>        
     </p>
     <p>
         <i class="fas fa-fan" style="color:#5e6dd7;"></i>
         <span id="fan">%FAN%</span>
         <sup class="units">&#37;</sup>
+         <sup class="units">
+            <label id="fanrun" style="color:#f7030e;">%FANRUN% </label>'
+             &#9851;
+        </sup>    
+        
     </p>
     <p>
         <i class="fas fa-drafting-compass" style="color:#5e6dd7;"></i>
@@ -83,9 +96,12 @@ setInterval(function() {
             var obj =this.responseText;
             var jobj = JSON.parse(obj);
             document.getElementById("temperature").innerHTML = jobj.Temperature;
+            document.getElementById("tempmin").innerHTML = jobj.TemperatureMin;
+            document.getElementById("tempmax").innerHTML = jobj.TemperatureMax;
             document.getElementById("clock").innerHTML = jobj.Clock;
             document.getElementById("date").innerHTML = jobj.Date;
             document.getElementById("fan").innerHTML = jobj.Fan;
+            document.getElementById("fanrun").innerHTML = jobj.FanElapsed;
             document.getElementById("servo").innerHTML = jobj.Servo;
             document.getElementById("lastupdate").innerHTML = jobj.LastUpdate;
             document.getElementById("uptime").innerHTML = jobj.UpTime;                       

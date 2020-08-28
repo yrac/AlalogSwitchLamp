@@ -7,8 +7,10 @@
 extern int FanRun;
 int speed = 0;
 double temp = 0;
+int FanRunElapsed;
 bool IsFanRun = false;
-int RunTimeFan = 60; //in milisec
+int RunTimeFan = 60; //in secc
+int mintemp, maxtemp, crisistemp, idletemp, countIdle;
 
 
 void initFan(){
@@ -17,30 +19,46 @@ void initFan(){
     delay(5000);
     digitalWrite(Fan, 0);
     Serial.println("End Test Fan");
+    mintemp = 37;
+    maxtemp = mintemp + 2;
+    crisistemp = 50;
 }
 
 void RunFan(){
   temp = Temp(analogRead(ntc));    
-  if(FanRun == 0){        
+  if(FanRun <= 0){        
     FanRun--;
-      if(temp >= 40 && temp <= 50){
-        speed = 200;  
-        FanRun += RunTimeFan;
+      if(temp >= maxtemp){
+        speed = 250;  
+        FanRun = RunTimeFan;
+        countIdle = 0;
+        FanRunElapsed = 0;
       }else{
         FanRun = 0;
         speed = 0;
+        idletemp = temp;
+        countIdle++;
       }              
-      analogWrite(OffLights, speed);
-  }else
-  {
-    if(temp > 37){
-       FanRun++;       
+  }else{
+    if(temp > mintemp){
+       FanRun++;
+       if(FanRunElapsed >= (RunTimeFan * 30) && temp < crisistemp)
+        {         
+          mintemp++;
+          maxtemp = mintemp+2;
+          FanRun = RunTimeFan;
+        }         
+    }else{   
+      if(FanRun > RunTimeFan) FanRun = RunTimeFan;
+      FanRun--;
     }
-    if(FanRun <= 55){
-      speed++;
-    }
-   FanRun--;
-   //State = "Run Fan at " + String(speed) +" speed";
   }  
-  digitalWrite(Fan, speed);  
+  
+  if(countIdle == (RunTimeFan * 10)  && temp < crisistemp){
+      mintemp = idletemp;
+      maxtemp = mintemp + 2;
+  }
+  if(speed > 0) FanRunElapsed++;
+  digitalWrite(Fan, speed);    
+  analogWrite(OffLights, speed);
 }
