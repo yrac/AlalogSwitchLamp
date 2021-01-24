@@ -1,14 +1,14 @@
-#include <FS.h> 
+#include <FS.h>
 #include <Arduino.h>
-#include <Servo.h> 
+#include <Servo.h>
 #include <loopTimer.h>
 #include <millisDelay.h>
 
 // Define Servo Properties
 #define ServoPin  D4
-int ServoOff  = 180;
+int ServoOff  = 190;
 int ServoInit = 90;
-int ServoOn = 10;
+int ServoOn = 0;
 int ServoState = 0;
 bool ServoChecked = false;
 uint16_t servomin = 480;
@@ -20,7 +20,7 @@ millisDelay delayBegin, delayEnd;
 Servo shutterServo;
 
 ///Firing servo by state
-void FiringServo(bool IsOn, bool force = false){   
+void FiringServo(bool IsOn, bool force = false){
   if(!shutterServo.attached())
   {
     shutterServo.attach(ServoPin, servomin, servomax);
@@ -28,17 +28,17 @@ void FiringServo(bool IsOn, bool force = false){
 
     ServoState = shutterServo.read();
     Serial.println(ServoState);
-      if((IsOn && (ServoState != ServoOn)) || force){          
-        shutterServo.write(ServoOn); 
+      if((IsOn && (ServoState != ServoOn)) || force){
+        shutterServo.write(ServoOn);
         Serial.println("On");
         State = "Servo Firing to On ";
-      }else if((!IsOn && (ServoState != ServoOff)) || force){    
-        shutterServo.write(ServoOff); 
-        Serial.println("Off");       
+      }else if((!IsOn && (ServoState != ServoOff)) || force){
+        shutterServo.write(ServoOff);
+        Serial.println("Off");
         State = "Servo Firing to Off ";
-      }      
+      }
       ServoChecked = false;
-      //shutterServo.write(ServoInit);       
+      //shutterServo.write(ServoInit);
       ServoState = shutterServo.read();
 }
 
@@ -50,23 +50,23 @@ void initServo() {
   delay(2000);
 
   Serial.println("Steady");
-  shutterServo.attach(ServoPin); 
-  delay(2000); 
+  shutterServo.attach(ServoPin);
+  delay(2000);
 
   Serial.println("On");
-  shutterServo.write(ServoOn);  
+  shutterServo.write(ServoOn);
   delay(2000);
 
   Serial.println("Neutral");
-  shutterServo.write(ServoInit);  
+  shutterServo.write(ServoInit);
   delay(2000);
 
   Serial.println("Off");
-  shutterServo.write(ServoOff); 
+  shutterServo.write(ServoOff);
   delay(2000);
 
   Serial.println("Neutral");
-  shutterServo.write(ServoInit); 
+  shutterServo.write(ServoInit);
   delay(2000);
 
   Serial.println("End Test Servo");
@@ -74,17 +74,17 @@ void initServo() {
 }
 
 ///Check servo possition
-void CheckServo(){  
+void CheckServo(){
   if(delayEnd.justFinished()){
       delayEnd.repeat();
     //if(!ServoChecked){
-      // if(!shutterServo.attached()){ 
+      // if(!shutterServo.attached()){
       //   shutterServo.attach(ServoPin, servomin, servomax);
       //   Serial.println("Servo : " + shutterServo.attached());
       // }
 
       if(shutterServo.read() != ServoInit){
-        shutterServo.write(ServoInit);        
+        shutterServo.write(ServoInit);
         Serial.println("Servo Pos " + shutterServo.read());
         //shutterServo.detach();
         ServoChecked = true;
@@ -95,7 +95,7 @@ void CheckServo(){
 }
 
 ///Firing servo by angle
-void FiringServo(int angle){ 
+void FiringServo(int angle){
   if(!shutterServo.attached()){
      shutterServo.attach(ServoPin);
      shutterServo.write(angle);

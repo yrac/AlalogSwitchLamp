@@ -5,7 +5,7 @@
 #endif
 
 //#include <DNsserver.h>
-#include <FS.h>  
+#include <FS.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
 #include <template/Xmltemplate.h>
@@ -26,7 +26,7 @@ String htmltemp, htmlfan, htmltime;
 String htmlservo = "";
 String htmlclosing = "</div></body></html>";
 String htmlcurtime = "";
- 
+
 //String request = "";
 String ResponseBody ="";
 extern String StateTime, StateDate, LastUpdate ;
@@ -60,19 +60,20 @@ void InitWebServer(){
     root["TemperatureMin"] = mintemp;
     root["TemperatureMax"] = maxtemp;
     root["Fan"] = speed;
-    root["FanElapsed"] = (float)(FanRunElapsed / 60);    
+    root["FanElapsed"] = (float)(FanRunElapsed / 60);
     root["Servo"] = String(ServoState);
     root["LastUpdate"] = LastUpdate;
     root["UpTime"] = uptime_formatter::getUptime();//  (( millis()/1000 ) / 60 ) / 60;
     root["Info"] = State;
     root.printTo(*response);
-    request->send(response);  
+    request->send(response);
     });
 
   server.begin();
 }
 
 boolean Connect(){
+  bool HasConn = false;
   digitalWrite(LED_BUILTIN, digitalRead(LED_BUILTIN) == HIGH ? LOW : LOW);
   // WiFiManagerParameter custom_output("server", "server addr", serveraddr, 50);
   AsyncWiFiManager  wifiManager(&server,&dns);
@@ -82,6 +83,8 @@ boolean Connect(){
   analogWrite(LedGreen, 255);
   analogWrite(Ledblue, 255);
   delay(5000);
+
+  wifiManager.setConfigPortalTimeout(60);
 
  // wifiManager.setAPStaticIPConfig(IPAddress(192,168,11,1));
   HasConn = wifiManager.autoConnect("NodeMCU");
@@ -100,7 +103,7 @@ boolean Connect(){
 bool CheckConnection(){
   uint8_t pulledstate = LOW;
   bool res = false;
-  if(WiFi.status() == WL_CONNECTED){  
+  if(WiFi.status() == WL_CONNECTED){
     pulledstate = LOW;
     res = true;
   }else

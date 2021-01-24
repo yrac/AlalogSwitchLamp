@@ -1,4 +1,4 @@
-#include <FS.h>  
+#include <FS.h>
 #include <Arduino.h>
 #include <services/FireBaseServices.h>
 #include <LightsControl.h>
@@ -27,8 +27,9 @@ void Event(bool state){
 }
 
 void Init(){
-  Serial.begin(9600);  
-  //Serial.begin(115200);  
+  Serial.begin(9600);
+  EEPROM.begin(512);
+  //Serial.begin(115200);
   pinMode(Ledblue, OUTPUT);
   pinMode(LedGreen, OUTPUT);
   pinMode(ButtonTrigger, INPUT);
@@ -42,33 +43,31 @@ void Init(){
 }
 
 void setup()
-{  
-    Init();    
-    Connect();   
+{
+    Init();
+    Connect();
     UpdateTime();
-    delaycheck.start(10000);
+    delaycheck.start(2000);
     delayloop.start(1000);
 }
- 
+
 void AnotherCheck(){
   if(CheckConnection()) //CheckFireBase();
-  CheckServo();  
-  GetUpdateTime();   
+  CheckServo();
+  GetUpdateTime();
 }
 
 void loop()
-{   
+{
   if(delayloop.justFinished()){
     delayloop.repeat();
-    RunFan(); 
+    RunFan();
     RunTime();
     BlinkLights(ss);
   }
-  
+
     if (delaycheck.justFinished()) {
         delaycheck.repeat();
         AnotherCheck();
     }
 }
-
-
