@@ -122,10 +122,10 @@ void UpdateTime(){
     needupdate = false;
     FiringOn = 0;
     force = true;
-  }else if(LastUpdateHours == 0){
-    for(int i = 14; i >= 0; i--){
-        if(i<2){}
-    }
+//}else if(LastUpdateHours == 0){
+//for(int i = 14; i >= 0; i--){
+//  if(i<2){}
+//    }
   }else{
    needupdate = true;
   }

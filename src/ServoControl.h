@@ -6,9 +6,9 @@
 
 // Define Servo Properties
 #define ServoPin  D4
-int ServoOff  = 190;
-int ServoInit = 90;
-int ServoOn = 0;
+int ServoOff  = 0;
+int ServoInit = 50;
+int ServoOn = 110;
 int ServoState = 0;
 bool ServoChecked = false;
 uint16_t servomin = 480;
